@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"github.com/gesellix/couchdb-prometheus-exporter/lib"
 )
 
 type ClusterSetup struct {
 	Action      string `json:"action"`
 	RemoteNode  string `json:"remote_node,omitempty"`
+	Host        string `json:"host,omitempty"`
 	Port        string `json:"port,omitempty"`
 	Username    string `json:"username,omitempty"`
 	Password    string `json:"password,omitempty"`
@@ -30,7 +30,7 @@ func SetupClusterNodes(ipAddresses []string) error {
 
 	// TODO extract node setup into dedicated functions
 	for _, ip := range ipAddresses {
-		client := lib.NewCouchdbClient(fmt.Sprintf("http://%s:5984", ip), lib.BasicAuth{}, []string{})
+		client := NewCouchdbClient(fmt.Sprintf("http://%s:5984", ip), BasicAuth{}, []string{})
 
 		databaseNames := []string{"_users", "_replicator"}
 		for _, dbName := range databaseNames {
@@ -50,7 +50,7 @@ func SetupClusterNodes(ipAddresses []string) error {
 	otherNodeIps := ipAddresses[1:]
 	nodeCount := len(ipAddresses)
 
-	client := lib.NewCouchdbClient(fmt.Sprintf("http://%s:5984", setupNodeIp), lib.BasicAuth{Username: adminUsername, Password: adminPassword}, []string{})
+	client := NewCouchdbClient(fmt.Sprintf("http://%s:5984", setupNodeIp), BasicAuth{Username: adminUsername, Password: adminPassword}, []string{})
 
 	body, err := json.Marshal(ClusterSetup{
 		Action:      "enable_cluster",
@@ -61,7 +61,7 @@ func SetupClusterNodes(ipAddresses []string) error {
 	if err != nil {
 		return err
 	}
-	client.Request("PUT", fmt.Sprintf("http://%s:5984/_cluster_setup", setupNodeIp), strings.NewReader(string(body)))
+	client.Request("POST", fmt.Sprintf("http://%s:5984/_cluster_setup", setupNodeIp), strings.NewReader(string(body)))
 
 	for _, ip := range otherNodeIps {
 		body, err = json.Marshal(ClusterSetup{
@@ -75,18 +75,18 @@ func SetupClusterNodes(ipAddresses []string) error {
 		if err != nil {
 			return err
 		}
-		client.Request("PUT", fmt.Sprintf("http://%s:5984/_cluster_setup", setupNodeIp), strings.NewReader(string(body)))
+		client.Request("POST", fmt.Sprintf("http://%s:5984/_cluster_setup", setupNodeIp), strings.NewReader(string(body)))
 
 		body, err = json.Marshal(ClusterSetup{
-			Action:     "add_node",
-			RemoteNode: ip,
-			Port:       "5984",
-			Username:   adminUsername,
-			Password:   adminPassword})
+			Action:   "add_node",
+			Host:     ip,
+			Port:     "5984",
+			Username: adminUsername,
+			Password: adminPassword})
 		if err != nil {
 			return err
 		}
-		client.Request("PUT", fmt.Sprintf("http://%s:5984/_cluster_setup", setupNodeIp), strings.NewReader(string(body)))
+		client.Request("POST", fmt.Sprintf("http://%s:5984/_cluster_setup", setupNodeIp), strings.NewReader(string(body)))
 	}
 
 	body, err = json.Marshal(ClusterSetup{
@@ -94,7 +94,7 @@ func SetupClusterNodes(ipAddresses []string) error {
 	if err != nil {
 		return err
 	}
-	client.Request("PUT", fmt.Sprintf("http://%s:5984/_cluster_setup", setupNodeIp), strings.NewReader(string(body)))
+	client.Request("POST", fmt.Sprintf("http://%s:5984/_cluster_setup", setupNodeIp), strings.NewReader(string(body)))
 
 	return nil
 }

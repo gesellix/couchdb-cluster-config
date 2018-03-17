@@ -30,12 +30,14 @@ func AwaitNodes(ipAddresses []string) error {
 			return err
 		}
 	}
+	time.Sleep(5 * time.Second)
+
 	return nil
 }
 
 func awaitNode(ip string) (bool, error) {
-	timeout := time.After(10 * time.Second)
-	tick := time.Tick(500 * time.Millisecond)
+	timeout := time.After(20 * time.Second)
+	tick := time.Tick(1000 * time.Millisecond)
 	for {
 		select {
 		case <-timeout:
@@ -58,10 +60,11 @@ func fetch(ip string) (bool, error) {
 	ipAndPort := fmt.Sprintf("%s:5984", ip)
 	conn, err := net.DialTimeout("tcp", ipAndPort, time.Second)
 	if err != nil {
-		if err, ok := err.(net.Error); ok && err.Timeout() {
+		if err, ok := err.(net.Error); ok && err.Timeout() || err.Temporary() {
 			return false, nil
 		}
-		return false, err
+		return false, nil
+		//return false, err
 	}
 	defer conn.Close()
 	return true, nil
