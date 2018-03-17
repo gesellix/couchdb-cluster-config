@@ -39,7 +39,7 @@ func (c *CouchdbClient) Request(method string, uri string, body io.Reader) (resp
 		req.SetBasicAuth(c.basicAuth.Username, c.basicAuth.Password)
 	}
 
-	fmt.Printf("[REQ] %v\n", req)
+	fmt.Printf("[REQ] %s %s@%v\n", req.Method, c.basicAuth.Username, req.URL)
 	resp, err := c.client.Do(req)
 	if err != nil {
 		fmt.Printf("[RES-ERR] %v\n", err)
