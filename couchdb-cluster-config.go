@@ -24,11 +24,6 @@ func main() {
 			return fmt.Errorf("please pass a list of node ip addresses")
 		}
 
-		nodes = []string{
-			"172.16.238.11",
-			"172.16.238.12",
-			"172.16.238.13",
-		}
 		fmt.Printf("Going to setup the following nodes as cluster\n%v\n", nodes)
 		return cluster_config.SetupClusterNodes(nodes)
 	}
