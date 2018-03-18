@@ -7,21 +7,21 @@ import (
 	"time"
 )
 
-func AwaitNodes(ipAddresses []string) error {
+func AwaitNodes(addresses []string) error {
 	resc, errc := make(chan bool), make(chan error)
 
-	for _, ip := range ipAddresses {
-		go func(ip string) {
-			success, err := awaitNode(ip)
+	for _, address := range addresses {
+		go func(address string) {
+			success, err := awaitNode(address)
 			if err != nil {
 				errc <- err
 				return
 			}
 			resc <- success
-		}(ip)
+		}(address)
 	}
 
-	for i := 0; i < len(ipAddresses); i++ {
+	for i := 0; i < len(addresses); i++ {
 		select {
 		case res := <-resc:
 			fmt.Println(res)
@@ -35,18 +35,18 @@ func AwaitNodes(ipAddresses []string) error {
 	return nil
 }
 
-func awaitNode(ip string) (bool, error) {
+func awaitNode(address string) (bool, error) {
 	timeout := time.After(20 * time.Second)
 	tick := time.Tick(1000 * time.Millisecond)
 	for {
 		select {
 		case <-timeout:
 			fmt.Println("timeout")
-			return false, errors.New(fmt.Sprintf("timed out @%s", ip))
+			return false, errors.New(fmt.Sprintf("timed out @%s", address))
 		case <-tick:
-			fmt.Println(fmt.Sprintf("tick@%s", ip))
+			fmt.Println(fmt.Sprintf("tick@%s", address))
 
-			ok, err := fetch(ip)
+			ok, err := fetch(address)
 			if err != nil {
 				return false, err
 			} else if ok {
@@ -56,9 +56,8 @@ func awaitNode(ip string) (bool, error) {
 	}
 }
 
-func fetch(ip string) (bool, error) {
-	ipAndPort := fmt.Sprintf("%s:5984", ip)
-	conn, err := net.DialTimeout("tcp", ipAndPort, time.Second)
+func fetch(address string) (bool, error) {
+	conn, err := net.DialTimeout("tcp", address, time.Second)
 	if err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() || err.Temporary() {
 			return false, nil

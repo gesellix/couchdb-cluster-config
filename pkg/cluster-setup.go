@@ -23,7 +23,11 @@ const (
 )
 
 func SetupClusterNodes(ipAddresses []string) error {
-	err := AwaitNodes(ipAddresses)
+	hosts := make([]string, len(ipAddresses))
+	for i, ip := range ipAddresses {
+		hosts[i] = fmt.Sprintf("%s:5984", ip)
+	}
+	err := AwaitNodes(hosts)
 	if err != nil {
 		return err
 	}
