@@ -22,7 +22,7 @@ const (
 	adminPassword = "a-secret"
 )
 
-func SetupClusterNodes(ipAddresses []string, insecure *bool) error {
+func SetupClusterNodes(ipAddresses []string, insecure bool) error {
 	hosts := make([]string, len(ipAddresses))
 	for i, ip := range ipAddresses {
 		hosts[i] = fmt.Sprintf("%s:5984", ip)

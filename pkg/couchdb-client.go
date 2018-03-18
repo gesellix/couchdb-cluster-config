@@ -54,10 +54,10 @@ func (c *CouchdbClient) Request(method string, uri string, body io.Reader) (resp
 	return respData, nil
 }
 
-func NewCouchdbClient(uri string, basicAuth BasicAuth, databases []string, insecure *bool) *CouchdbClient {
+func NewCouchdbClient(uri string, basicAuth BasicAuth, databases []string, insecure bool) *CouchdbClient {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: *insecure},
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
 		},
 	}
 

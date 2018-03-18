@@ -6,11 +6,6 @@ import (
 	"os"
 	"github.com/gesellix/couchdb-cluster-config/pkg"
 	"github.com/urfave/cli"
-	"flag"
-)
-
-var (
-	insecure = flag.Bool("insecure", true, "Ignore server certificate if using https")
 )
 
 func main() {
@@ -21,6 +16,10 @@ func main() {
 			Name:  "nodes",
 			Usage: "list of node ip addresses to participate in the CouchDB cluster",
 		},
+		cli.BoolTFlag{
+			Name:  "insecure",
+			Usage: "Ignore server certificate if using https",
+		},
 	}
 
 	app.Action = func(c *cli.Context) error {
@@ -30,7 +29,7 @@ func main() {
 		}
 
 		fmt.Printf("Going to setup the following nodes as cluster\n%v\n", nodes)
-		return cluster_config.SetupClusterNodes(nodes, insecure)
+		return cluster_config.SetupClusterNodes(nodes, c.Bool("insecure"))
 	}
 
 	err := app.Run(os.Args)
