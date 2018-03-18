@@ -2,15 +2,10 @@ package cluster_config
 
 import (
 	"crypto/tls"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"io"
-)
-
-var (
-	insecure = flag.Bool("insecure", true, "Ignore server certificate if using https")
 )
 
 type BasicAuth struct {
@@ -59,7 +54,7 @@ func (c *CouchdbClient) Request(method string, uri string, body io.Reader) (resp
 	return respData, nil
 }
 
-func NewCouchdbClient(uri string, basicAuth BasicAuth, databases []string) *CouchdbClient {
+func NewCouchdbClient(uri string, basicAuth BasicAuth, databases []string, insecure *bool) *CouchdbClient {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: *insecure},

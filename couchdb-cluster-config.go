@@ -6,6 +6,11 @@ import (
 	"os"
 	"github.com/gesellix/couchdb-cluster-config/pkg"
 	"github.com/urfave/cli"
+	"flag"
+)
+
+var (
+	insecure = flag.Bool("insecure", true, "Ignore server certificate if using https")
 )
 
 func main() {
@@ -25,7 +30,7 @@ func main() {
 		}
 
 		fmt.Printf("Going to setup the following nodes as cluster\n%v\n", nodes)
-		return cluster_config.SetupClusterNodes(nodes)
+		return cluster_config.SetupClusterNodes(nodes, insecure)
 	}
 
 	err := app.Run(os.Args)

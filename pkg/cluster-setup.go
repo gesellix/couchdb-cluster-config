@@ -22,7 +22,7 @@ const (
 	adminPassword = "a-secret"
 )
 
-func SetupClusterNodes(ipAddresses []string) error {
+func SetupClusterNodes(ipAddresses []string, insecure *bool) error {
 	hosts := make([]string, len(ipAddresses))
 	for i, ip := range ipAddresses {
 		hosts[i] = fmt.Sprintf("%s:5984", ip)
@@ -34,7 +34,7 @@ func SetupClusterNodes(ipAddresses []string) error {
 
 	// TODO extract node setup into dedicated functions
 	for _, ip := range ipAddresses {
-		client := NewCouchdbClient(fmt.Sprintf("http://%s:5984", ip), BasicAuth{}, []string{})
+		client := NewCouchdbClient(fmt.Sprintf("http://%s:5984", ip), BasicAuth{}, []string{}, insecure)
 
 		databaseNames := []string{"_users", "_replicator"}
 		for _, dbName := range databaseNames {
@@ -54,7 +54,7 @@ func SetupClusterNodes(ipAddresses []string) error {
 	otherNodeIps := ipAddresses[1:]
 	nodeCount := len(ipAddresses)
 
-	client := NewCouchdbClient(fmt.Sprintf("http://%s:5984", setupNodeIp), BasicAuth{Username: adminUsername, Password: adminPassword}, []string{})
+	client := NewCouchdbClient(fmt.Sprintf("http://%s:5984", setupNodeIp), BasicAuth{Username: adminUsername, Password: adminPassword}, []string{}, insecure)
 
 	body, err := json.Marshal(ClusterSetup{
 		Action:      "enable_cluster",
