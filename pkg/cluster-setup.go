@@ -17,12 +17,36 @@ type ClusterSetup struct {
 	NodeCount   int    `json:"node_count,omitempty"`
 }
 
-const (
-	adminUsername = "root"
-	adminPassword = "a-secret"
-)
+func CreateAdmin(ipAddresses []string, auth BasicAuth, insecure bool) error {
+	for _, ip := range ipAddresses {
+		client := NewCouchdbClient(fmt.Sprintf("http://%s:5984", ip), BasicAuth{}, insecure)
+		_, err := client.Request(
+			"PUT",
+			fmt.Sprintf("%s/_node/couchdb@%s/_config/admins/%s", client.BaseUri, ip, auth.Username),
+			strings.NewReader(fmt.Sprintf("\"%s\"", auth.Password)))
+		// TODO when the admin already exists, then don't fail.
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
-func SetupClusterNodes(ipAddresses []string, insecure bool) error {
+func CreateCoreDatabases(databaseNames []string, ipAddresses []string, auth BasicAuth, insecure bool) error {
+	for _, ip := range ipAddresses {
+		client := NewCouchdbClient(fmt.Sprintf("http://%s:5984", ip), auth, insecure)
+		for _, dbName := range databaseNames {
+			_, err := client.Request("PUT", fmt.Sprintf("%s/%s", client.BaseUri, dbName), nil)
+			// TODO when the database already exists, then don't fail.
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func SetupClusterNodes(ipAddresses []string, adminAuth BasicAuth, insecure bool) error {
 	hosts := make([]string, len(ipAddresses))
 	for i, ip := range ipAddresses {
 		hosts[i] = fmt.Sprintf("%s:5984", ip)
@@ -32,34 +56,26 @@ func SetupClusterNodes(ipAddresses []string, insecure bool) error {
 		return err
 	}
 
-	// TODO extract node setup into dedicated functions
-	for _, ip := range ipAddresses {
-		client := NewCouchdbClient(fmt.Sprintf("http://%s:5984", ip), BasicAuth{}, []string{}, insecure)
+	err = CreateAdmin(ipAddresses, adminAuth, insecure)
+	if err != nil {
+		return err
+	}
 
-		databaseNames := []string{"_users", "_replicator"}
-		for _, dbName := range databaseNames {
-			_, err = client.Request("PUT", fmt.Sprintf("%s/%s", client.BaseUri, dbName), nil)
-			if err != nil {
-				return err
-			}
-		}
-
-		_, err = client.Request("PUT", fmt.Sprintf("%s/_node/couchdb@%s/_config/admins/%s", client.BaseUri, ip, adminUsername), strings.NewReader(fmt.Sprintf("\"%s\"", adminPassword)))
-		if err != nil {
-			return err
-		}
+	err = CreateCoreDatabases([]string{"_users", "_replicator"}, ipAddresses, adminAuth, insecure)
+	if err != nil {
+		return err
 	}
 
 	setupNodeIp := ipAddresses[:1]
 	otherNodeIps := ipAddresses[1:]
 	nodeCount := len(ipAddresses)
 
-	client := NewCouchdbClient(fmt.Sprintf("http://%s:5984", setupNodeIp), BasicAuth{Username: adminUsername, Password: adminPassword}, []string{}, insecure)
+	client := NewCouchdbClient(fmt.Sprintf("http://%s:5984", setupNodeIp), adminAuth, insecure)
 
 	body, err := json.Marshal(ClusterSetup{
 		Action:      "enable_cluster",
-		Username:    adminUsername,
-		Password:    adminPassword,
+		Username:    adminAuth.Username,
+		Password:    adminAuth.Password,
 		BindAddress: "0.0.0.0",
 		NodeCount:   nodeCount})
 	if err != nil {
@@ -72,8 +88,8 @@ func SetupClusterNodes(ipAddresses []string, insecure bool) error {
 			Action:      "enable_cluster",
 			RemoteNode:  ip,
 			Port:        "5984",
-			Username:    adminUsername,
-			Password:    adminPassword,
+			Username:    adminAuth.Username,
+			Password:    adminAuth.Password,
 			BindAddress: "0.0.0.0",
 			NodeCount:   nodeCount})
 		if err != nil {
@@ -85,8 +101,8 @@ func SetupClusterNodes(ipAddresses []string, insecure bool) error {
 			Action:   "add_node",
 			Host:     ip,
 			Port:     "5984",
-			Username: adminUsername,
-			Password: adminPassword})
+			Username: adminAuth.Username,
+			Password: adminAuth.Password})
 		if err != nil {
 			return err
 		}

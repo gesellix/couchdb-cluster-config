@@ -16,7 +16,6 @@ type BasicAuth struct {
 type CouchdbClient struct {
 	BaseUri   string
 	basicAuth BasicAuth
-	databases []string
 	client    *http.Client
 }
 
@@ -54,7 +53,7 @@ func (c *CouchdbClient) Request(method string, uri string, body io.Reader) (resp
 	return respData, nil
 }
 
-func NewCouchdbClient(uri string, basicAuth BasicAuth, databases []string, insecure bool) *CouchdbClient {
+func NewCouchdbClient(uri string, basicAuth BasicAuth, insecure bool) *CouchdbClient {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
@@ -64,7 +63,6 @@ func NewCouchdbClient(uri string, basicAuth BasicAuth, databases []string, insec
 	return &CouchdbClient{
 		BaseUri:   uri,
 		basicAuth: basicAuth,
-		databases: databases,
 		client:    httpClient,
 	}
 }
