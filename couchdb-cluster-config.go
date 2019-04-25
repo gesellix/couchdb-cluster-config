@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"github.com/gesellix/couchdb-cluster-config/pkg"
 	"github.com/urfave/cli"
+	"log"
+	"os"
+	"time"
 )
 
 func main() {
@@ -46,8 +47,10 @@ func main() {
 				}
 
 				fmt.Printf("Going to setup the following nodes as cluster\n%v\n", nodes)
+				timeout := time.After(20 * time.Second)
 				return cluster_config.SetupClusterNodes(
 					nodes,
+					timeout,
 					cluster_config.BasicAuth{
 						Username: c.String("username"),
 						Password: c.String("password")},
