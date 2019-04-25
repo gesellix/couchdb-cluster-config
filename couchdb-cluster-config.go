@@ -24,6 +24,11 @@ func main() {
 					Name:  "nodes",
 					Usage: "list of node ip addresses to participate in the CouchDB cluster",
 				},
+				cli.DurationFlag{
+					Name:  "timeout",
+					Usage: "timeout until all nodes need to be available",
+					Value: 20 * time.Second,
+				},
 				cli.StringFlag{
 					Name:  "username",
 					Usage: "admin username - admin will be created, if missing",
@@ -47,7 +52,7 @@ func main() {
 				}
 
 				fmt.Printf("Going to setup the following nodes as cluster\n%v\n", nodes)
-				timeout := time.After(20 * time.Second)
+				timeout := time.After(c.Duration("timeout") * time.Second)
 				return cluster_config.SetupClusterNodes(
 					nodes,
 					timeout,
