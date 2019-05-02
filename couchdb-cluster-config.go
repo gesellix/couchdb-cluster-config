@@ -56,12 +56,13 @@ func main() {
 					return fmt.Errorf("please provide an admin password")
 				}
 
-				fmt.Printf("Going to setup the following nodes as cluster\n%v\n", nodes)
+				ips := cluster_config.ToIpAddresses(nodes)
+				fmt.Printf("Going to setup the following nodes as cluster\n%v\n", ips)
 				return cluster_config.SetupClusterNodes(
 					cluster_config.ClusterSetupConfig{
-						IpAddresses: cluster_config.ToIpAddresses(nodes),
-						Delay:       c.Duration("delay") * time.Second,
-						Timeout:     c.Duration("timeout") * time.Second,
+						IpAddresses: ips,
+						Delay:       c.Duration("delay"),
+						Timeout:     c.Duration("timeout"),
 					},
 					cluster_config.BasicAuth{
 						Username: c.String("username"),
