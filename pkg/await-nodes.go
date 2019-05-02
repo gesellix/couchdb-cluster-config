@@ -37,11 +37,11 @@ func AwaitNodes(addresses []string, delay time.Duration, timeout time.Duration, 
 }
 
 func awaitNode(address string, timeout time.Duration, check func(address string) (bool, error)) (bool, error) {
-	cancelAfter := time.After(timeout)
+	timeoutReached := time.After(timeout)
 	tick := time.Tick(1000 * time.Millisecond)
 	for {
 		select {
-		case <-cancelAfter:
+		case <-timeoutReached:
 			//fmt.Println("timeout")
 			return false, errors.New(fmt.Sprintf("timeout@%s", address))
 		case <-tick:
