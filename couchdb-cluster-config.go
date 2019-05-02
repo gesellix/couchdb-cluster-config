@@ -56,8 +56,10 @@ func main() {
 					return fmt.Errorf("please provide an admin password")
 				}
 
+				delay := c.Duration("delay")
 				ips := cluster_config.ToIpAddresses(nodes)
-				fmt.Printf("Going to setup the following nodes as cluster\n%v\n", ips)
+
+				fmt.Printf("Going to setup the following nodes as cluster, delayed by %fs\n%v\n", delay.Seconds(), ips)
 				return cluster_config.SetupClusterNodes(
 					cluster_config.ClusterSetupConfig{
 						IpAddresses: ips,
