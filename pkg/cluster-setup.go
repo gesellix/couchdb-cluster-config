@@ -13,7 +13,7 @@ type IpAddress string
 type IpAddresses []IpAddress
 
 func ToIpAddresses(s []string) IpAddresses {
-	c := IpAddresses{}
+	c := make(IpAddresses, len(s))
 	for i, v := range s {
 		c[i] = IpAddress(v)
 	}
