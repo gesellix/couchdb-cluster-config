@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/gesellix/couchdb-cluster-config/pkg"
-	"github.com/urfave/cli"
 	"log"
 	"os"
 	"time"
+
+	"github.com/urfave/cli"
+
+	"github.com/gesellix/couchdb-cluster-config/pkg"
 )
 
 func main() {
