@@ -1,15 +1,15 @@
-FROM alpine:3.9 AS builder
+FROM golang:1.13-alpine AS builder
 LABEL builder=true
 
-ENV CGO_ENABLED=0
-ENV GOPATH /go
-ENV APPPATH $GOPATH/src/github.com/gesellix/couchdb-cluster-config
-
-RUN adduser -DH user
+RUN adduser --no-create-home --gecos "" --disabled-password user
 RUN apk add --update -t build-deps go git mercurial libc-dev gcc libgcc
-COPY . $APPPATH
-RUN cd $APPPATH && go get -d \
- && go build \
+
+ENV GO111MODULE=on
+ENV CGO_ENABLED=0
+
+WORKDIR /project
+COPY . /project
+RUN go build \
     -a \
     -ldflags '-extldflags "-static"' \
     -o /bin/couchdb-cluster-config
