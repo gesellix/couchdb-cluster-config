@@ -16,6 +16,12 @@ jobs:
         uses: actions/setup-go@v1
         with:
           go-version: 1.13
+      - name: Run GoReleaser (Snapshot)
+        uses: goreleaser/goreleaser-action@v1
+        with:
+          version: latest
+          args: release --skip-publish --rm-dist --snapshot
+        if: github.event.ref != 'ref/heads/master'
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v1
         with:
@@ -24,4 +30,5 @@ jobs:
 #          key: ${{ secrets.YOUR_PRIVATE_KEY }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: github.event.ref == 'ref/heads/master'
 ...
