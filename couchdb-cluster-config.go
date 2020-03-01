@@ -11,12 +11,18 @@ import (
 	"github.com/gesellix/couchdb-cluster-config/pkg"
 )
 
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "CouchDB Cluster Config"
 	app.Usage = ""
 	app.Description = "Setup a CouchDB 2.x cluster"
-	app.Version = ""
+	app.Version = fmt.Sprintf("%s (%s, %s)", version, commit, date)
 	app.Commands = []cli.Command{
 		{
 			Name:  "setup",
