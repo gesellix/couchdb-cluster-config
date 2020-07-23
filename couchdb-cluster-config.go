@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
 	"github.com/gesellix/couchdb-cluster-config/pkg"
 )
@@ -23,30 +23,30 @@ func main() {
 	app.Usage = ""
 	app.Description = "Setup a CouchDB 2.x cluster"
 	app.Version = fmt.Sprintf("%s (%s, %s)", version, commit, date)
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
 		{
 			Name:  "setup",
 			Usage: "perform a cluster setup",
 			Flags: []cli.Flag{
-				cli.StringSliceFlag{
+				&cli.StringSliceFlag{
 					Name:  "nodes",
 					Usage: "list of node ip addresses to participate in the CouchDB cluster",
 				},
-				cli.DurationFlag{
+				&cli.DurationFlag{
 					Name:  "delay",
 					Usage: "time to wait before the cluster setup will be started",
 					Value: 5 * time.Second,
 				},
-				cli.DurationFlag{
+				&cli.DurationFlag{
 					Name:  "timeout",
 					Usage: "time until all nodes need to be available",
 					Value: 20 * time.Second,
 				},
-				cli.StringFlag{
+				&cli.StringFlag{
 					Name:  "username",
 					Usage: "admin username - admin will be created, if missing",
 				},
-				cli.StringFlag{
+				&cli.StringFlag{
 					Name:  "password",
 					Usage: "admin password",
 				},
@@ -83,9 +83,10 @@ func main() {
 		},
 	}
 	app.Flags = []cli.Flag{
-		cli.BoolTFlag{
+		&cli.BoolFlag{
 			Name:  "insecure",
 			Usage: "ignore server certificate if using https",
+			Value: true,
 		},
 	}
 
