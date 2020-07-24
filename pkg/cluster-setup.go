@@ -120,11 +120,6 @@ func SetupClusterNodes(config ClusterSetupConfig, adminAuth BasicAuth, insecure 
 		return err
 	}
 
-	err = CreateCoreDatabases([]string{"_users", "_replicator"}, config.IpAddresses, adminAuth, insecure)
-	if err != nil {
-		return err
-	}
-
 	setupNodeIp := config.IpAddresses[:1][0]
 	otherNodeIps := config.IpAddresses[1:]
 	nodeCount := len(config.IpAddresses)
@@ -148,6 +143,7 @@ func SetupClusterNodes(config ClusterSetupConfig, adminAuth BasicAuth, insecure 
 		}
 		if clusterSetupResponse.State == "cluster_finished" {
 			// cluster already set up
+			fmt.Println("cluster setup already finished.")
 			return nil
 		}
 	}
@@ -216,6 +212,11 @@ func SetupClusterNodes(config ClusterSetupConfig, adminAuth BasicAuth, insecure 
 		"POST",
 		fmt.Sprintf("http://%s:5984/_cluster_setup", setupNodeIp),
 		strings.NewReader(string(body)))
+	if err != nil {
+		return err
+	}
+
+	err = CreateCoreDatabases([]string{"_users", "_replicator"}, config.IpAddresses, adminAuth, insecure)
 	if err != nil {
 		return err
 	}
