@@ -44,6 +44,10 @@ type ClusterSetupResponse struct {
 	State string `json:"state"`
 }
 
+type UuidsResponse struct {
+	Uuids []string `json:"uuids"`
+}
+
 func AdminExists(ip IpAddress, auth BasicAuth, insecure bool) (bool, error) {
 	client := NewCouchdbClient(fmt.Sprintf("http://%s:5984", ip), BasicAuth{}, insecure)
 	resp, err := client.Request(
@@ -129,8 +133,35 @@ func SetupClusterNodes(config ClusterSetupConfig, adminAuth BasicAuth, insecure 
 
 	client := NewCouchdbClient(fmt.Sprintf("http://%s:5984", setupNodeIp), adminAuth, insecure)
 
-	clusterEnabled := false
 	resp, err := client.Request("GET",
+		fmt.Sprintf("http://%s:5984/_uuids?count=2", setupNodeIp),
+		nil)
+	if err != nil {
+		return err
+	}
+	var uuids UuidsResponse
+	if resp.StatusCode == 200 {
+		respBody, err := ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
+
+		err = json.Unmarshal(respBody, &uuids)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Ensure that the coordinating node has a valid uuid.
+	// Relates to https://github.com/apache/couchdb/issues/2858
+	_, err = client.Request(
+		"PUT",
+		fmt.Sprintf("http://%s:5984/_node/_local/_config/couchdb/uuid", setupNodeIp),
+		strings.NewReader(fmt.Sprintf("\"%s\"", uuids.Uuids[:1][0])))
+	if err != nil {
+		return err
+	}
+
+	clusterEnabled := false
+	resp, err = client.Request("GET",
 		fmt.Sprintf("http://%s:5984/_cluster_setup", setupNodeIp),
 		nil)
 	if err != nil {
@@ -221,13 +252,14 @@ func SetupClusterNodes(config ClusterSetupConfig, adminAuth BasicAuth, insecure 
 	if err != nil {
 		return err
 	}
-	_, err = client.Request(
+	res, err := client.RequestBody(
 		"POST",
 		fmt.Sprintf("http://%s:5984/_cluster_setup", setupNodeIp),
 		strings.NewReader(string(body)))
 	if err != nil {
 		return err
 	}
+	fmt.Println(fmt.Sprintf("finished cluster setup: %+v", string(res)))
 
 	err = CreateCoreDatabases([]string{"_users", "_replicator"}, config.IpAddresses, adminAuth, insecure)
 	if err != nil {
