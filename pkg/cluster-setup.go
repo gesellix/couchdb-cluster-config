@@ -27,14 +27,17 @@ type ClusterSetupConfig struct {
 }
 
 type ClusterSetup struct {
-	Action      string `json:"action"`
-	RemoteNode  string `json:"remote_node,omitempty"`
-	Host        string `json:"host,omitempty"`
-	Port        string `json:"port,omitempty"`
-	Username    string `json:"username,omitempty"`
-	Password    string `json:"password,omitempty"`
-	BindAddress string `json:"bind_address,omitempty"`
-	NodeCount   int    `json:"node_count,omitempty"`
+	Action                string   `json:"action"`
+	RemoteNode            string   `json:"remote_node,omitempty"`
+	RemoteCurrentUser     string   `json:"remote_current_user,omitempty"`
+	RemoteCurrentPassword string   `json:"remote_current_password,omitempty"`
+	Host                  string   `json:"host,omitempty"`
+	Port                  int      `json:"port,omitempty"`
+	Username              string   `json:"username,omitempty"`
+	Password              string   `json:"password,omitempty"`
+	BindAddress           string   `json:"bind_address,omitempty"`
+	NodeCount             int      `json:"node_count,omitempty"`
+	EnsureDbsExist        []string `json:"ensure_dbs_exist,omitempty"`
 }
 
 type ClusterSetupResponse struct {
@@ -126,6 +129,7 @@ func SetupClusterNodes(config ClusterSetupConfig, adminAuth BasicAuth, insecure 
 
 	client := NewCouchdbClient(fmt.Sprintf("http://%s:5984", setupNodeIp), adminAuth, insecure)
 
+	clusterEnabled := false
 	resp, err := client.Request("GET",
 		fmt.Sprintf("http://%s:5984/_cluster_setup", setupNodeIp),
 		nil)
@@ -146,34 +150,43 @@ func SetupClusterNodes(config ClusterSetupConfig, adminAuth BasicAuth, insecure 
 			fmt.Println("cluster setup already finished.")
 			return nil
 		}
+		if clusterSetupResponse.State == "cluster_enabled" {
+			clusterEnabled = true
+		}
 	}
 
-	body, err := json.Marshal(ClusterSetup{
-		Action:      "enable_cluster",
-		Username:    adminAuth.Username,
-		Password:    adminAuth.Password,
-		BindAddress: "0.0.0.0",
-		NodeCount:   nodeCount})
-	if err != nil {
-		return err
-	}
-	_, err = client.Request(
-		"POST",
-		fmt.Sprintf("http://%s:5984/_cluster_setup", setupNodeIp),
-		strings.NewReader(string(body)))
-	if err != nil {
-		return err
+	var body []byte
+	if !clusterEnabled {
+		body, err = json.Marshal(ClusterSetup{
+			Action:      "enable_cluster",
+			Username:    adminAuth.Username,
+			Password:    adminAuth.Password,
+			BindAddress: "0.0.0.0",
+			Port:        5984,
+			NodeCount:   nodeCount})
+		if err != nil {
+			return err
+		}
+		_, err = client.Request(
+			"POST",
+			fmt.Sprintf("http://%s:5984/_cluster_setup", setupNodeIp),
+			strings.NewReader(string(body)))
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, ip := range otherNodeIps {
 		body, err = json.Marshal(ClusterSetup{
-			Action:      "enable_cluster",
-			RemoteNode:  string(ip),
-			Port:        "5984",
-			Username:    adminAuth.Username,
-			Password:    adminAuth.Password,
-			BindAddress: "0.0.0.0",
-			NodeCount:   nodeCount})
+			Action:                "enable_cluster",
+			RemoteNode:            string(ip),
+			Port:                  5984,
+			RemoteCurrentUser:     adminAuth.Username,
+			RemoteCurrentPassword: adminAuth.Password,
+			Username:              adminAuth.Username,
+			Password:              adminAuth.Password,
+			BindAddress:           "0.0.0.0",
+			NodeCount:             nodeCount})
 		if err != nil {
 			return err
 		}
@@ -188,7 +201,7 @@ func SetupClusterNodes(config ClusterSetupConfig, adminAuth BasicAuth, insecure 
 		body, err = json.Marshal(ClusterSetup{
 			Action:   "add_node",
 			Host:     string(ip),
-			Port:     "5984",
+			Port:     5984,
 			Username: adminAuth.Username,
 			Password: adminAuth.Password})
 		if err != nil {
