@@ -261,10 +261,11 @@ func SetupClusterNodes(config ClusterSetupConfig, adminAuth BasicAuth, insecure 
 	}
 	fmt.Println(fmt.Sprintf("finished cluster setup: %+v", string(res)))
 
-	err = CreateCoreDatabases([]string{"_users", "_replicator"}, config.IpAddresses, adminAuth, insecure)
-	if err != nil {
-		return err
-	}
+	// Those databases should be created during the cluster setup (`ensure_dbs_exist` defaults to [_users, _replicator]).
+	//err = CreateCoreDatabases([]string{"_users", "_replicator"}, config.IpAddresses, adminAuth, insecure)
+	//if err != nil {
+	//	return err
+	//}
 
 	return nil
 }
