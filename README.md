@@ -4,7 +4,7 @@ Util to configure a CouchDB 2.x cluster with several nodes.
 
 ## Motivation
 
-Maybe you've followed the official [cluster setup docs](http://docs.couchdb.org/en/stable/cluster/setup.html)
+Maybe you've followed the official [cluster setup docs](https://docs.couchdb.org/en/stable/setup/cluster.html)
 when trying to setup a CouchDB cluster.
 
 Maybe, like me, you didn't _really_ follow every tiny bit.
