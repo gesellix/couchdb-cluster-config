@@ -8,7 +8,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/gesellix/couchdb-cluster-config/pkg"
+	"github.com/gesellix/couchdb-cluster-config/v17/pkg"
 )
 
 var (
