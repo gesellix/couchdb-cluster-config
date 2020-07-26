@@ -1,4 +1,4 @@
-module github.com/gesellix/couchdb-cluster-config/v16
+module github.com/gesellix/couchdb-cluster-config
 
 go 1.13
 
