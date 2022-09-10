@@ -1,8 +1,8 @@
-version: "2.3"
+version: "3.2"
 
 services:
   couchdb1:
-    image: couchdb:3.1.0
+    image: couchdb:3.2.2
     command: -setcookie thecookie
     environment:
       - "COUCHDB_USER=${COUCHDB_USER:-admin}"
@@ -17,7 +17,7 @@ services:
       - "15984:5984"
 
   couchdb2:
-    image: couchdb:3.1.0
+    image: couchdb:3.2.2
     command: -setcookie thecookie
     environment:
       - "COUCHDB_USER=${COUCHDB_USER:-admin}"
@@ -32,7 +32,7 @@ services:
       - "25984:5984"
 
   couchdb3:
-    image: couchdb:3.1.0
+    image: couchdb:3.2.2
     command: -setcookie thecookie
     environment:
       - "COUCHDB_USER=${COUCHDB_USER:-admin}"
@@ -65,7 +65,8 @@ services:
 networks:
   couchdb-cluster:
     driver: overlay
+    attachable: true
     ipam:
       driver: default
       config:
-        - subnet: "172.16.238.0/24"
+        - subnet: 172.16.238.0/24
