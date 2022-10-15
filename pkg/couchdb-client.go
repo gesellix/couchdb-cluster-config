@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -45,7 +44,7 @@ func (c *CouchdbClient) Request(method string, uri string, body io.Reader) (resp
 
 func (c *CouchdbClient) RequestBody(method string, uri string, body io.Reader) (respBody []byte, err error) {
 	resp, err := c.Request(method, uri, body)
-	respBody, err = ioutil.ReadAll(resp.Body)
+	respBody, err = io.ReadAll(resp.Body)
 	resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 400 {
 		if err != nil {

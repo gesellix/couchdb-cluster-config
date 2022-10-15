@@ -3,7 +3,7 @@ package cluster_config
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"strings"
 	"time"
 )
@@ -141,7 +141,7 @@ func SetupClusterNodes(config ClusterSetupConfig, adminAuth BasicAuth, insecure 
 	}
 	var uuids UuidsResponse
 	if resp.StatusCode == 200 {
-		respBody, err := ioutil.ReadAll(resp.Body)
+		respBody, err := io.ReadAll(resp.Body)
 		resp.Body.Close()
 
 		err = json.Unmarshal(respBody, &uuids)
@@ -168,7 +168,7 @@ func SetupClusterNodes(config ClusterSetupConfig, adminAuth BasicAuth, insecure 
 		return err
 	}
 	if resp.StatusCode == 200 {
-		respBody, err := ioutil.ReadAll(resp.Body)
+		respBody, err := io.ReadAll(resp.Body)
 		resp.Body.Close()
 
 		var clusterSetupResponse ClusterSetupResponse
