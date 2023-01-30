@@ -2,7 +2,7 @@ module github.com/gesellix/couchdb-cluster-config/v17
 
 go 1.19
 
-require github.com/urfave/cli/v2 v2.24.1
+require github.com/urfave/cli/v2 v2.24.2
 
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
