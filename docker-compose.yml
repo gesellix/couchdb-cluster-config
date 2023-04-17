@@ -2,7 +2,7 @@ version: "3.2"
 
 services:
   couchdb1:
-    image: couchdb:3.2.2
+    image: couchdb:3.3.1
     command: -setcookie thecookie
     environment:
       - "COUCHDB_USER=${COUCHDB_USER:-admin}"
@@ -17,7 +17,7 @@ services:
       - "15984:5984"
 
   couchdb2:
-    image: couchdb:3.2.2
+    image: couchdb:3.3.1
     command: -setcookie thecookie
     environment:
       - "COUCHDB_USER=${COUCHDB_USER:-admin}"
@@ -32,7 +32,7 @@ services:
       - "25984:5984"
 
   couchdb3:
-    image: couchdb:3.2.2
+    image: couchdb:3.3.1
     command: -setcookie thecookie
     environment:
       - "COUCHDB_USER=${COUCHDB_USER:-admin}"
