@@ -1,4 +1,4 @@
-FROM golang:1.22.5-alpine AS builder
+FROM golang:1.23.0-alpine AS builder
 LABEL builder=true
 
 RUN adduser --no-create-home --gecos "" --disabled-password user
